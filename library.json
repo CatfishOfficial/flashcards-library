@@ -1,1 +1,9 @@
-
+{
+  "collections": [
+    {
+      "id": "spanish",
+      "title": "Spanish Basics",
+      "path": "spanish.json"
+    }
+  ]
+}
