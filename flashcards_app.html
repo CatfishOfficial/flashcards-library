@@ -1,0 +1,310 @@
+# Flashcard App
+
+Below is the **updated full project template**, including expanded examples for all files and new optional files for offline/advanced versions.
+
+---
+
+## index.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flashcards App</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.webmanifest">
+</head>
+<body>
+  <h1>Flashcards App</h1>
+
+  <div class="deck-selector">
+    <label for="deckSelect">Choose a deck:</label>
+    <select id="deckSelect"></select>
+  </div>
+
+  <div id="flashcard" class="card">Loading...</div>
+
+  <div class="controls">
+    <button id="prevBtn">Previous</button>
+    <button id="flipBtn">Flip</button>
+    <button id="nextBtn">Next</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+```
+
+---
+
+## styles.css
+```css
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+  background: #f3f3f3;
+}
+
+.card {
+  width: 300px;
+  height: 200px;
+  margin: 20px auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.controls button {
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 6px;
+}
+```
+
+---
+
+## app.js
+```javascript
+const deckSelect = document.getElementById("deckSelect");
+let cards = [];
+let index = 0;
+let showingFront = true;
+
+async function loadDeckList() {
+  const res = await fetch("categories.json");
+  const categories = await res.json();
+
+  deckSelect.innerHTML = "";
+
+  categories.decks.forEach(deck => {
+    const option = document.createElement("option");
+    option.value = deck.file;
+    option.textContent = deck.name;
+    deckSelect.appendChild(option);
+  });
+
+  loadDeck(deckSelect.value);
+}
+
+async function loadDeck(file) {
+  const res = await fetch(file);
+  const deck = await res.json();
+  cards = deck.cards;
+  index = 0;
+  showingFront = true;
+  renderCard();
+}
+
+deckSelect.addEventListener("change", () => loadDeck(deckSelect.value));
+
+document.getElementById("prevBtn").onclick = () => {
+  index = (index - 1 + cards.length) % cards.length;
+  showingFront = true;
+  renderCard();
+};
+
+document.getElementById("nextBtn").onclick = () => {
+  index = (index + 1) % cards.length;
+  showingFront = true;
+  renderCard();
+};
+
+document.getElementById("flipBtn").onclick = () => {
+  showingFront = !showingFront;
+  renderCard();
+};
+
+function renderCard() {
+  const cardElem = document.getElementById("flashcard");
+  if (!cards.length) {
+    cardElem.textContent = "No cards loaded";
+    return;
+  }
+  cardElem.textContent = showingFront ? cards[index].front : cards[index].back;
+}
+
+loadDeckList();
+```
+
+---
+
+## flashcards.json (example deck)
+```json
+{
+  "title": "Sample Flashcards",
+  "description": "Basic example deck for testing the system.",
+  "cards": [
+    { "front": "What is the capital of France?", "back": "Paris" },
+    { "front": "2 + 2 = ?", "back": "4" },
+    { "front": "Who wrote '1984'?", "back": "George Orwell" }
+  ]
+}
+```
+
+---
+
+## categories.json (new)
+```json
+{
+  "decks": [
+    { "name": "Sample Deck", "file": "flashcards.json" },
+    { "name": "Biology Basics", "file": "biology.json" },
+    { "name": "Spanish Verbs", "file": "spanish.json" }
+  ]
+}
+```
+
+---
+
+## manifest.webmanifest (new)
+```json
+{
+  "name": "Flashcards App",
+  "short_name": "Flashcards",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": []
+}
+```
+
+---
+
+## offline.html (new standalone offline version)
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Offline Flashcards</title>
+<style>
+  body { font-family: Arial; text-align: center; padding: 20px; }
+  .card { width: 300px; height: 200px; margin: 20px auto; background: white; padding: 20px; }
+</style>
+</head>
+<body>
+  <h1>Offline Flashcards</h1>
+
+  <select id="deck"></select>
+  <div id="card" class="card"></div>
+  <button onclick="prev()">Prev</button>
+  <button onclick="flip()">Flip</button>
+  <button onclick="next()">Next</button>
+
+<script>
+const decks = {
+  "Example Offline Deck": [
+    { front: "Offline Test 1", back: "Answer 1" },
+    { front: "Offline Test 2", back: "Answer 2" }
+  ]
+};
+
+let currentDeck = [];
+let i = 0;
+let front = true;
+
+const deckSelect = document.getElementById('deck');
+for (let d in decks) {
+  const opt = document.createElement('option');
+  opt.value = d;
+  opt.textContent = d;
+  deckSelect.appendChild(opt);
+}
+
+deckSelect.onchange = () => load(deckSelect.value);
+load(deckSelect.value);
+
+function load(name) {
+  currentDeck = decks[name];
+  i = 0;
+  front = true;
+  show();
+}
+
+function show() {
+  document.getElementById('card').textContent = front ? currentDeck[i].front : currentDeck[i].back;
+}
+function prev() { i = (i - 1 + currentDeck.length) % currentDeck.length; front = true; show(); }
+function next() { i = (i + 1) % currentDeck.length; front = true; show(); }
+function flip() { front = !front; show(); }
+</script>
+</body>
+</html>
+```
+
+---
+
+## biology.json (example template)
+```json
+{
+  "title": "Biology Basics",
+  "description": "Intro biology terms and definitions.",
+  "cards": [
+    { "front": "What is the powerhouse of the cell?", "back": "Mitochondria" },
+    { "front": "DNA stands for?", "back": "Deoxyribonucleic Acid" }
+  ]
+}
+```
+
+## spanish.json (example template)
+```json
+{
+  "title": "Spanish Verb Basics",
+  "description": "Starter verbs for beginners.",
+  "cards": [
+    { "front": "Ser — yo ___", "back": "soy" },
+    { "front": "Tener — él ___", "back": "tiene" }
+  ]
+}
+```
+
+## advanced-template.json (for more complex decks)
+```json
+{
+  "title": "Advanced Template",
+  "description": "Full-featured flashcard template including tags and difficulty levels.",
+  "cards": [
+    {
+      "front": "What is an API?",
+      "back": "Application Programming Interface",
+      "tags": ["tech", "programming"],
+      "difficulty": "medium"
+    },
+    {
+      "front": "Define entropy.",
+      "back": "A measure of disorder in a system.",
+      "tags": ["science", "physics"],
+      "difficulty": "hard"
+    }
+  ]
+}
+```
+
+## README.md (template for each deck folder)
+```md
+# Deck Name Here
+
+**Description:** Explain what this deck covers.
+
+**File:** `yourdeck.json`
+
+## Structure
+- `title`: Name of the deck
+- `description`: Short explanation
+- `cards`: List of flashcards
+  - `front`: Question or prompt
+  - `back`: Answer
+  - (optional) `tags`: Array of categories
+  - (optional) `difficulty`: easy/medium/hard
+```
+

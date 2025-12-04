@@ -1,0 +1,9 @@
+{
+  "title": "Sample Flashcards",
+  "description": "Basic example deck for testing the system.",
+  "cards": [
+    { "front": "What is the capital of France?", "back": "Paris" },
+    { "front": "2 + 2 = ?", "back": "4" },
+    { "front": "Who wrote '1984'?", "back": "George Orwell" }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "Spanish Verb Basics",
+  "description": "Starter verbs for beginners.",
+  "cards": [
+    { "front": "Ser — yo ___", "back": "soy" },
+    { "front": "Tener — él ___", "back": "tiene" }
+  ]
+}

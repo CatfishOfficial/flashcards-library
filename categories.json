@@ -1,0 +1,7 @@
+{
+  "decks": [
+    { "name": "Sample Deck", "file": "flashcards.json" },
+    { "name": "Biology Basics", "file": "biology.json" },
+    { "name": "Spanish Verbs", "file": "spanish.json" }
+  ]
+}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Offline Flashcards</title>
+<style>
+  body { font-family: Arial; text-align: center; padding: 20px; }
+  .card { width: 300px; height: 200px; margin: 20px auto; background: white; padding: 20px; }
+</style>
+</head>
+<body>
+  <h1>Offline Flashcards</h1>
+
+  <select id="deck"></select>
+  <div id="card" class="card"></div>
+  <button onclick="prev()">Prev</button>
+  <button onclick="flip()">Flip</button>
+  <button onclick="next()">Next</button>
+
+<script>
+const decks = {
+  "Example Offline Deck": [
+    { front: "Offline Test 1", back: "Answer 1" },
+    { front: "Offline Test 2", back: "Answer 2" }
+  ]
+};
+
+let currentDeck = [];
+let i = 0;
+let front = true;
+
+const deckSelect = document.getElementById('deck');
+for (let d in decks) {
+  const opt = document.createElement('option');
+  opt.value = d;
+  opt.textContent = d;
+  deckSelect.appendChild(opt);
+}
+
+deckSelect.onchange = () => load(deckSelect.value);
+load(deckSelect.value);
+
+function load(name) {
+  currentDeck = decks[name];
+  i = 0;
+  front = true;
+  show();
+}
+
+function show() {
+  document.getElementById('card').textContent = front ? currentDeck[i].front : currentDeck[i].back;
+}
+function prev() { i = (i - 1 + currentDeck.length) % currentDeck.length; front = true; show(); }
+function next() { i = (i + 1) % currentDeck.length; front = true; show(); }
+function flip() { front = !front; show(); }
+</script>
+</body>
+</html>

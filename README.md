@@ -1,7 +1,14 @@
-# flashcards-library
+# Deck Name Here
 
---Flashcard system to be added to another Cail&Co. project, The Bookworm--
-This repo is mainly just to store everything, the real thing will be on the website.
-90% of this is made with Claude.
-Very awesome.
-Most likely broken.
+**Description:** Explain what this deck covers.
+
+**File:** `yourdeck.json`
+
+## Structure
+- `title`: Name of the deck
+- `description`: Short explanation
+- `cards`: List of flashcards
+  - `front`: Question or prompt
+  - `back`: Answer
+  - (optional) `tags`: Array of categories
+  - (optional) `difficulty`: easy/medium/hard

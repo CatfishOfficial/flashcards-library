@@ -1,0 +1,18 @@
+{
+  "title": "Advanced Template",
+  "description": "Full-featured flashcard template including tags and difficulty levels.",
+  "cards": [
+    {
+      "front": "What is an API?",
+      "back": "Application Programming Interface",
+      "tags": ["tech", "programming"],
+      "difficulty": "medium"
+    },
+    {
+      "front": "Define entropy.",
+      "back": "A measure of disorder in a system.",
+      "tags": ["science", "physics"],
+      "difficulty": "hard"
+    }
+  ]
+}

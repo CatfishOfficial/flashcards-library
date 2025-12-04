@@ -1,0 +1,8 @@
+{
+  "title": "Biology Basics",
+  "description": "Intro biology terms and definitions.",
+  "cards": [
+    { "front": "What is the powerhouse of the cell?", "back": "Mitochondria" },
+    { "front": "DNA stands for?", "back": "Deoxyribonucleic Acid" }
+  ]
+}
