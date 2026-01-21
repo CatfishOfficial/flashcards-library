@@ -1,28 +1,50 @@
+:root {
+  color-scheme: dark;
+  font-family: "Fira Mono", "Courier New", monospace;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
-    background: #f3f3f3;
-  }
-  
-  .card {
-    width: 300px;
-    height: 200px;
-    margin: 20px auto;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    font-size: 1.2rem;
-    cursor: pointer;
-  }
-  
-  .controls button {
-    margin: 5px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    border-radius: 6px;
-  }
+  margin: 0;
+  background: #0b0d13;
+  color: #d7d7e0;
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-shell {
+  max-width: 780px;
+  padding: 32px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 2rem;
+}
+
+p {
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+#game {
+  background: #101827;
+  border: 2px solid #2b3d54;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 16px;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  white-space: pre;
+}
+
+.goal {
+  color: #7df29c;
+}
+
+#status {
+  margin-top: 12px;
+  min-height: 1.5em;
+  color: #9fd3ff;
+}
