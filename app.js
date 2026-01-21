@@ -1,59 +1,219 @@
-const deckSelect = document.getElementById("deckSelect");
-let cards = [];
-let index = 0;
-let showingFront = true;
+const gameEl = document.getElementById("game");
+const statusEl = document.getElementById("status");
 
-async function loadDeckList() {
-  const res = await fetch("categories.json");
-  const categories = await res.json();
+const level = [
+  "########################################",
+  "#......................................#",
+  "#......................................#",
+  "#.............###......................#",
+  "#......................................#",
+  "#.................#####................#",
+  "#......................................#",
+  "#......###.............................#",
+  "#......................................#",
+  "#..................................G...#",
+  "#.......................####...........#",
+  "#......................................#",
+  "#...............###....................#",
+  "#......................................#",
+  "#....P.................................#",
+  "########################################",
+];
 
-  deckSelect.innerHTML = "";
+const tileMap = level.map((row) => row.split(""));
+const width = tileMap[0].length;
+const height = tileMap.length;
 
-  categories.decks.forEach(deck => {
-    const option = document.createElement("option");
-    option.value = deck.file;
-    option.textContent = deck.name;
-    deckSelect.appendChild(option);
-  });
+const player = {
+  x: 0,
+  y: 0,
+  vx: 0,
+  vy: 0,
+  onGround: false,
+};
 
-  loadDeck(deckSelect.value);
+const keys = {
+  left: false,
+  right: false,
+  jump: false,
+};
+
+const physics = {
+  gravity: 0.28,
+  moveSpeed: 0.6,
+  maxFall: 3.5,
+  jumpSpeed: -4.2,
+  friction: 0.8,
+};
+
+let lastTime = 0;
+let hasWon = false;
+
+function findPlayerStart() {
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (tileMap[y][x] === "P") {
+        tileMap[y][x] = ".";
+        return { x, y };
+      }
+    }
+  }
+  return { x: 1, y: height - 2 };
 }
 
-async function loadDeck(file) {
-  const res = await fetch(file);
-  const deck = await res.json();
-  cards = deck.cards;
-  index = 0;
-  showingFront = true;
-  renderCard();
+function resetGame() {
+  const start = findPlayerStart();
+  player.x = start.x;
+  player.y = start.y;
+  player.vx = 0;
+  player.vy = 0;
+  player.onGround = false;
+  hasWon = false;
+  statusEl.textContent = "";
 }
 
-deckSelect.addEventListener("change", () => loadDeck(deckSelect.value));
+function isSolid(x, y) {
+  if (x < 0 || y < 0 || x >= width || y >= height) {
+    return true;
+  }
+  return tileMap[y][x] === "#";
+}
 
-document.getElementById("prevBtn").onclick = () => {
-  index = (index - 1 + cards.length) % cards.length;
-  showingFront = true;
-  renderCard();
-};
+function isGoal(x, y) {
+  if (x < 0 || y < 0 || x >= width || y >= height) {
+    return false;
+  }
+  return tileMap[y][x] === "G";
+}
 
-document.getElementById("nextBtn").onclick = () => {
-  index = (index + 1) % cards.length;
-  showingFront = true;
-  renderCard();
-};
-
-document.getElementById("flipBtn").onclick = () => {
-  showingFront = !showingFront;
-  renderCard();
-};
-
-function renderCard() {
-  const cardElem = document.getElementById("flashcard");
-  if (!cards.length) {
-    cardElem.textContent = "No cards loaded";
+function updatePlayer() {
+  if (hasWon) {
+    player.vx = 0;
+    player.vy = 0;
     return;
   }
-  cardElem.textContent = showingFront ? cards[index].front : cards[index].back;
+
+  if (keys.left) {
+    player.vx = -physics.moveSpeed;
+  } else if (keys.right) {
+    player.vx = physics.moveSpeed;
+  } else {
+    player.vx *= physics.friction;
+    if (Math.abs(player.vx) < 0.05) {
+      player.vx = 0;
+    }
+  }
+
+  if (keys.jump && player.onGround) {
+    player.vy = physics.jumpSpeed;
+    player.onGround = false;
+  }
+
+  player.vy += physics.gravity;
+  if (player.vy > physics.maxFall) {
+    player.vy = physics.maxFall;
+  }
+
+  moveAxis(player.vx, 0);
+  moveAxis(0, player.vy);
 }
 
-loadDeckList();
+function moveAxis(dx, dy) {
+  const steps = Math.ceil(Math.max(Math.abs(dx), Math.abs(dy)));
+  if (steps === 0) {
+    return;
+  }
+  const stepX = dx / steps;
+  const stepY = dy / steps;
+
+  for (let i = 0; i < steps; i += 1) {
+    const nextX = player.x + stepX;
+    const nextY = player.y + stepY;
+
+    if (!isSolid(Math.round(nextX), Math.round(player.y))) {
+      player.x = nextX;
+    } else {
+      player.vx = 0;
+    }
+
+    if (!isSolid(Math.round(player.x), Math.round(nextY))) {
+      player.y = nextY;
+      player.onGround = false;
+    } else {
+      if (stepY > 0) {
+        player.onGround = true;
+      }
+      player.vy = 0;
+    }
+  }
+
+  const tileX = Math.round(player.x);
+  const tileY = Math.round(player.y);
+  if (isGoal(tileX, tileY)) {
+    hasWon = true;
+    statusEl.textContent = "You reached the goal! Press R to play again.";
+  }
+}
+
+function render() {
+  const buffer = tileMap.map((row) => row.slice());
+  const px = Math.round(player.x);
+  const py = Math.round(player.y);
+  if (buffer[py] && buffer[py][px]) {
+    buffer[py][px] = "@";
+  }
+  gameEl.textContent = buffer.map((row) => row.join("")).join("\n");
+}
+
+function gameLoop(timestamp) {
+  const delta = timestamp - lastTime;
+  lastTime = timestamp;
+
+  if (delta > 0) {
+    updatePlayer();
+    render();
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+window.addEventListener("keydown", (event) => {
+  switch (event.key) {
+    case "ArrowLeft":
+      keys.left = true;
+      break;
+    case "ArrowRight":
+      keys.right = true;
+      break;
+    case "ArrowUp":
+    case " ":
+      keys.jump = true;
+      break;
+    case "r":
+    case "R":
+      resetGame();
+      break;
+    default:
+      break;
+  }
+});
+
+window.addEventListener("keyup", (event) => {
+  switch (event.key) {
+    case "ArrowLeft":
+      keys.left = false;
+      break;
+    case "ArrowRight":
+      keys.right = false;
+      break;
+    case "ArrowUp":
+    case " ":
+      keys.jump = false;
+      break;
+    default:
+      break;
+  }
+});
+
+resetGame();
+requestAnimationFrame(gameLoop);
