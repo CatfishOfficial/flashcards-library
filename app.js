@@ -120,6 +120,9 @@ function updatePlayer() {
 
 function moveAxis(dx, dy) {
   const steps = Math.ceil(Math.max(Math.abs(dx), Math.abs(dy)));
+  if (steps === 0) {
+    return;
+  }
   const stepX = dx / steps;
   const stepY = dy / steps;
 
